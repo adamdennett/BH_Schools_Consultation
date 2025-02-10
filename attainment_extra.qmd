@@ -435,17 +435,19 @@ ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6
            label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
                          "\nIntercept:", round(coef(lm_before)[1], 2),
                          "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
-           hjust = 0.5, vjust = 1, size = 3) +
+           hjust = 0.5, vjust = 1.5, size = 3) +
   annotate("text", x = middle_within, y = min(subset_within$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
            label = paste("B&H FSM Range\nSlope:", round(coef(lm_within)[2], 2),
                          "\nIntercept:", round(coef(lm_within)[1], 2),
                          "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
-           hjust = 0.75, vjust = -3, size = 3) +
+           hjust = 0.75, vjust = -4, size = 3) +
   annotate("text", x = middle_after, y = min(subset_after$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
            label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
                          "\nIntercept:", round(coef(lm_after)[1], 2),
                          "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
            hjust = 0.5, vjust = -2.5, size = 3)
+
+#ggsave(here("images", "Attainment8_disadvantage.png"))
 
 ```
 

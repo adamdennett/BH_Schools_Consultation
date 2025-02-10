@@ -10,9 +10,24 @@ library(tidyverse)
 library(sf)
 library(tmap)
 library(here)
+library(janitor)
 
 optionZ <- st_read(here("data","optionZ.geojson"))
 current <- st_read(here("data","current_catchments.geojson"))
+
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700) %>% 
+  st_transform(4326) %>% 
+  st_set_crs(4326)
+
+bh_sec_sch <- brighton_sec_schools %>% 
+  select(urn, establishment_name, geometry) %>%
+  rename(id = urn)
 ```
 
 ```{r echo=F, message=F, warning=FALSE}
@@ -21,8 +36,11 @@ current <- st_read(here("data","current_catchments.geojson"))
 tmap_mode("view")
 
 tm_shape(current) +
-  tm_polygons(border.col = "black", alpha = 0)
-
+  tm_polygons(border.col = "black", alpha = 0) +
+tm_shape(bh_sec_sch) +
+  tm_dots(col = "black", 
+          border.lwd = 0,
+          labels = "establishment_name")
 
 
 
