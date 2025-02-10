@@ -8,6 +8,7 @@ project:
     - about.qmd
     - catchment_map.qmd
     - travel_maps.qmd
+    - factsheet_roadmap.qmd
 
 website:
   title: "Brighton and Hove Secondary Schools Consultation Evidence"
@@ -24,11 +25,13 @@ website:
         contents: 
           - absence.qmd
           - attainment_extra.qmd
-          - consultation_factsheet.qmd
       - section: "Maps"
         contents:
           - catchment_map.qmd
           - travel_maps.qmd
+      - section: "Factsheet / Roadmap"
+        contents:
+          - factsheet_roadmap.qmd
         
     tools:
       - icon: person-circle
