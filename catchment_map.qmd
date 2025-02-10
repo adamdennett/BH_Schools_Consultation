@@ -40,7 +40,7 @@ tm_shape(current) +
 tm_shape(bh_sec_sch) +
   tm_dots(col = "black", 
           border.lwd = 0,
-          labels = "establishment_name")
+          labels = "establishment_name") 
 
 
 
