@@ -1,0 +1,159 @@
+---
+title: "Equity_In_Responses"
+author: "Adam Dennett"
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+library(tidyr)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(usethis)
+library(tmap)
+library(readxl)
+library(r5r)
+library(RColorBrewer)
+library(accessibility)
+library(data.table)
+library(ggplot2)
+library(interp)
+library(h3jsr)
+library(h3r)
+library(osmextract)
+library(stplanr)
+library(od)
+library(tidytransit)
+library(ggrepel)
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+```
+
+```{r Connect-to-Database, warning=FALSE, message=FALSE, echo=FALSE}
+#connect to a local database to store some data later on
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+#check connection
+#dbListTables(con)
+
+```
+
+```{r}
+bn_postcodes <- st_read(con, "bn_postcode_centroids")
+
+pcds_p003 <- read_csv("data/pcds_p003.csv") %>% clean_names()
+pcd_hh_count <- read_csv("data/pcd_p002.csv") %>% clean_names()
+pcd_person_count <- read_csv("data/pcd_p001.csv") %>% clean_names()
+
+bh_pcd_hh_count <- pcd_hh_count %>% 
+  filter(grepl("^BN", postcode))
+
+bn_postcodes_pop <- bn_postcodes %>%
+  select(c("pcd", "pcd2", "pcds", "oa21", "lsoa21", "geometry")) %>%
+  merge(bh_pcd_hh_count, by.x = "pcds", by.y = "postcode")
+
+# Calculate the proportion of households in each postcode
+bn_postcodes_pop1 <- bn_postcodes_pop %>%
+  group_by(oa21) %>%
+  mutate(pcd_oa_hh_prop = count / sum(count)) %>%
+  ungroup()
+
+ew_oa <- st_read(con, "oa_2021_ew_bfc_v8") %>% 
+  st_set_crs(27700)
+# Filter the data frame
+bn_oa <- ew_oa %>%
+  filter(grepl("Brighton and Hove", lsoa21nm))
+
+bh_hh_comp <- read_csv("data/bh_hh_comp.csv")
+bh_hh_oa_map <- left_join(bh_hh_comp, bn_oa, by = join_by(oa21 == oa21cd))
+bh_hh_oa_map <- left_join(bn_oa, bh_hh_comp, by = join_by(oa21cd == oa21))
+
+
+
+```
+
+```{r}
+tmap_mode("view")
+tmap_options(check.and.fix = T)
+
+tm_shape(bn_oa) + 
+  tm_polygons() +
+tm_shape(bn_postcodes_pop) +
+  tm_dots()
+```
+
+```{r}
+
+tmap_mode("view")
+tmap_options(check.and.fix = T)
+
+tm_shape(bh_hh_oa_map) + 
+  tm_polygons(col = "prop_hh_dependent_ch", border.alpha = 0) 
+
+```
+
+```{r}
+
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>% 
+  merge(bh_hh_comp, by.x = "oa21", by.y = "oa21")
+
+# Create a new data frame with multiplied values
+bn_postcodes_pop2 <- bn_postcodes_pop1 %>%
+  mutate(total_hh = total_hh * pcd_oa_hh_prop,
+         married_couple_dependent_ch = married_couple_dependent_ch * pcd_oa_hh_prop,
+         cohabiting_couple_dependent_ch = cohabiting_couple_dependent_ch * pcd_oa_hh_prop,
+         lone_parent_dependent_ch = lone_parent_dependent_ch * pcd_oa_hh_prop,
+         all_dependent_ch_hh = all_dependent_ch_hh * pcd_oa_hh_prop,
+         prop_hh_dependent_ch = all_dependent_ch_hh / total_hh)
+
+# Create the new column
+bn_postcodes_pop2 <- bn_postcodes_pop2 %>%
+  mutate(pcd_sect = substr(pcd2, 1, 6)) %>% 
+  mutate(pcd_dist = substr(pcd2, 1, 4))
+  
+```
+
+```{r}
+bn_pcd_sect_hh_stats <- bn_postcodes_pop2 %>% 
+  select("all_dependent_ch_hh", "pcd_sect") %>% 
+  st_drop_geometry() %>%
+  group_by(pcd_sect) %>%
+  summarize(all_dependent_ch_hh_sum = sum(all_dependent_ch_hh, na.rm = TRUE))
+
+# Calculate the total sum of all_dependent_ch_hh
+total_all_dependent_ch_hh_sum <- sum(bn_pcd_sect_hh_stats$all_dependent_ch_hh_sum, na.rm = TRUE)
+
+# Add the proportion column
+bn_pcd_sect_hh_stats <- bn_pcd_sect_hh_stats %>%
+  mutate(proportion_all_dependent_ch_hh = all_dependent_ch_hh_sum / total_all_dependent_ch_hh_sum) %>% 
+  mutate(pct_all_dependent_ch_hh = (all_dependent_ch_hh_sum / total_all_dependent_ch_hh_sum)*100)
+
+
+bn_pcd_dist_hh_stats <- bn_postcodes_pop2 %>% 
+ select("all_dependent_ch_hh", "pcd_dist") %>% 
+  st_drop_geometry() %>%
+  group_by(pcd_dist) %>%
+  summarize(all_dependent_ch_hh_sum = sum(all_dependent_ch_hh, na.rm = TRUE))
+
+# Calculate the total sum of all_dependent_ch_hh
+total_all_dependent_ch_hh_sum <- sum(bn_pcd_dist_hh_stats$all_dependent_ch_hh_sum, na.rm = TRUE)
+
+# Add the proportion column
+bn_pcd_dist_hh_stats <- bn_pcd_dist_hh_stats %>%
+  mutate(proportion_all_dependent_ch_hh = all_dependent_ch_hh_sum / total_all_dependent_ch_hh_sum) %>% 
+  mutate(pct_all_dependent_ch_hh = (all_dependent_ch_hh_sum / total_all_dependent_ch_hh_sum)*100)
+
+
+write_csv(bn_pcd_sect_hh_stats, "data/bn_pcd_sect_hh_stats.csv")
+write_csv(bn_pcd_dist_hh_stats, "data/bn_pcd_dist_hh_stats.csv")
+```

@@ -109,6 +109,23 @@ bh_sec_sch$lat <- coords[, 2]
 
 ```
 
+```{r}
+library(dplyr)
+
+# Drop the geom column
+BN_pcds_to_school_dist1 <- st_drop_geometry(BN_pcds_to_school_dist) 
+# Assuming your DataFrame is named BN_pcds_to_school_dist
+summary_table <- BN_pcds_to_school_dist1 %>%
+  group_by(destination_id) %>%
+  summarise(sum_total_cost = sum(total_cost, na.rm = TRUE)/1000)
+
+print(summary_table)
+
+write_csv(summary_table, "total_pcds_to_school_dists.csv")
+
+```
+
+
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch_114581 <- bh_sec_sch %>% 
   filter(id == "114581")
