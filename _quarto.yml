@@ -8,6 +8,7 @@ project:
     - about.qmd
     - catchment_map.qmd
     - travel_maps.qmd
+    - factsheet_roadmap.qmd
     - postcode_school_pop.qmd
 
 website:
@@ -29,6 +30,7 @@ website:
         contents:
           - catchment_map.qmd
           - travel_maps.qmd
+          - postcode_school_pop.qmd
       - section: "Factsheet / Roadmap"
         contents:
           - factsheet_roadmap.qmd

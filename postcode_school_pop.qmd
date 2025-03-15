@@ -1,15 +1,23 @@
 ---
-title: "School Population Brighton and Hove"
+title: "Catchment Households and Deprivation, Brighton and Hove"
 author: "Adam Dennett"
 ---
 
-These estimates use postcode level population and household estimates derived from the 2021 Census, obtained from NOMIS - https://www.nomisweb.co.uk/sources/census_2021_pc
+In the map below, every circle represents a postcode in Brighton and Hove, sized according to the estimated number of households with dependent children living in that postcode, and coloured according to the proportion of all children in that postcode aged 0-15, living in income deprived families.
 
-Details of households with dependent children taken from the 2021 Census - Table TS003 Household Composition - https://www.nomisweb.co.uk/sources/census_2021_bulk
+Hover the mouse over each dot to see the postcode and estimated counts of households with dependent children.
 
-Deprivation data is taken from the 2019 Index of Multiple Deprivation -https://imd-by-geo.opendatacommunities.org/ - In this case I have used the IDACI - Income Deprivation Affecting Children
+The boundaries on the map represent the current (2024/25) school catchment boundaries (blue) and the proposed 2026/27 boundaries (red) taken from the [Catchment Area Postcode List](https://www.brighton-hove.gov.uk/schools-and-learning/apply-school/proposed-admission-arrangements-brighton-hove-schools-2026-2027#tab--catchment-area-postcode-list) published by Brighton and Hove District Council
 
-Counts of households with dependent children have been estimated using household proportions at postcode level to distribute output area level numbers of households with dependent children proportionally to each postcode in each output area.  
+The graphs below the map
+
+These estimates use postcode level population and household estimates derived from the 2021 Census, obtained from NOMIS - <https://www.nomisweb.co.uk/sources/census_2021_pc>
+
+Details of households with dependent children taken from the 2021 Census - Table TS003 Household Composition - <https://www.nomisweb.co.uk/sources/census_2021_bulk>
+
+Deprivation data is taken from the 2019 Index of Multiple Deprivation - <https://imd-by-geo.opendatacommunities.org> - In this case I have used the [Income Deprivation Affecting Children Index](https://opendatacommunities.org/def/concept/general-concepts/imd/idaci) - IDACI.
+
+Counts of households with dependent children have been estimated using household proportions at postcode level to distribute output area level numbers of households with dependent children proportionally to each postcode in each output area.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
 library(tidyr)
@@ -56,7 +64,7 @@ con <- dbConnect(RPostgres::Postgres(),
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE}
 bn_postcodes <- st_read(con, "bn_postcode_centroids")
 
 
@@ -107,9 +115,6 @@ bn_postcodes_pop1 <- merge(
   bn_all_deprivation, 
   by.x = "pcds", 
   by.y = "postcode")
-
-
-
 
 #write_csv(bh_pcd_hh_count, "bn_pcd_hh_count.csv")
 
@@ -162,6 +167,7 @@ library(leaflet)
 optionZ <- st_transform(optionZ, 4326)
 option0 <- st_transform(option0, 4326)
 selection <- st_transform(selection, 4326)
+bn_postcodes_pop1 <- st_transform(bn_postcodes_pop1, 4326)
 
 leaflet() %>%
   # Add a less intrusive basemap
@@ -190,9 +196,10 @@ leaflet() %>%
     opacity = 0.2,
     stroke = FALSE,
     label = ~paste(
+      Postcode,
       "Households Dependent Children:", `Households with Dependent Children`,
-      "<br>IDACI Decile:", `IDACI Decile`,
-      "<br>Total Households:", `Total Households`
+      "Total Households:", `Total Households`,
+      "IDACI Decile:", `IDACI Decile`
     ) # Tooltips for mouseover interactivity
   ) %>%
   # Add a legend for IDACI Decile
@@ -207,3 +214,132 @@ leaflet() %>%
 
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+library(sf)          # For spatial data manipulation
+library(dplyr)       # For data manipulation
+library(ggplot2)     # For plotting
+
+# 1. Perform spatial join
+joined_data1 <- st_join(bn_postcodes_pop1, optionZ, join = st_within)
+
+# 2. Aggregate the data
+aggregated_data1 <- joined_data1 %>%
+  group_by(id, catchment, idaci_decile) %>%
+  summarise(total_dep_ch = sum(pcd_dep_ch_hh_count_round, na.rm = TRUE)) %>%
+  ungroup()
+
+# Add the required library for palette
+library(RColorBrewer)
+
+# 3. Create a faceted bar graph with custom colors
+ggplot(aggregated_data1, aes(x = factor(idaci_decile), y = total_dep_ch, fill = idaci_decile)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(
+    colors = brewer.pal(11, "RdYlBu"),
+    limits = c(0, 10),  # Ensure 0 maps to red and 10 maps to blue
+    breaks = 0:10,      # Optional: discrete legend ticks for each decile
+    name = "IDACI Decile"
+  ) +
+  facet_wrap(~ catchment, scales = "fixed") +
+  labs(
+    title = "Count of Households with Dependent Children by IDACI Decile - New Catchments",
+    x = "IDACI Decile",
+    y = "Count Households with Dependent Children"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")  # Adjust the legend position
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+library(sf)          # For spatial data manipulation
+library(dplyr)       # For data manipulation
+library(ggplot2)     # For plotting
+
+# 1. Perform spatial join
+joined_data2 <- st_join(bn_postcodes_pop1, option0, join = st_within)
+
+# 2. Aggregate the data
+aggregated_data2 <- joined_data2 %>%
+  group_by(id, catchment, idaci_decile) %>%
+  summarise(total_dep_ch = sum(pcd_dep_ch_hh_count_round, na.rm = TRUE)) %>%
+  ungroup()
+
+# Add the required library for palette
+library(RColorBrewer)
+
+# 3. Create a faceted bar graph with custom colors
+ggplot(aggregated_data2, aes(x = factor(idaci_decile), y = total_dep_ch, fill = idaci_decile)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(
+    colors = brewer.pal(11, "RdYlBu"),
+    limits = c(0, 10),  # Ensure 0 maps to red and 10 maps to blue
+    breaks = 0:10,      # Optional: discrete legend ticks for each decile
+    name = "IDACI Decile"
+  ) +
+  facet_wrap(~ catchment, scales = "fixed") +
+  labs(
+    title = "Count of Households with Dependent Children by IDACI Decile - Current Catchments",
+    x = "IDACI Decile",
+    y = "Count Households with Dependent Children"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")  # Adjust the legend position
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+library(dplyr)
+
+# Step 1: Drop geometry and create the unique ID column
+aggregated_data1 <- aggregated_data1 %>%
+  st_set_geometry(NULL) %>%  # Drop geometry
+  mutate(unique_id = paste(catchment, idaci_decile, sep = "_"))
+
+aggregated_data2 <- aggregated_data2 %>%
+  st_set_geometry(NULL) %>%  # Drop geometry
+  mutate(unique_id = paste(catchment, idaci_decile, sep = "_"))
+
+# Step 2: Perform a full join on the unique ID column
+aggregated_data_diff <- aggregated_data1 %>%
+  full_join(aggregated_data2, by = "unique_id", suffix = c("_1", "_2")) %>%
+  mutate(
+    total_dep_ch_1 = replace_na(total_dep_ch_1, 0),  # Set missing values to zero
+    total_dep_ch_2 = replace_na(total_dep_ch_2, 0),
+    total_dep_ch_diff = total_dep_ch_1 - total_dep_ch_2  # Calculate the difference
+  ) %>%
+  mutate(
+    catchment = if_else(!is.na(catchment_1), catchment_1, catchment_2),  # Resolve `catchment`
+    idaci_decile = if_else(!is.na(idaci_decile_1), idaci_decile_1, idaci_decile_2)  # Resolve `idaci_decile`
+  ) %>%
+  select(
+    catchment,
+    idaci_decile,
+    total_dep_ch_diff
+  )
+
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+# 3. Create a faceted bar graph with custom colors
+ggplot(aggregated_data_diff, aes(x = factor(idaci_decile), y = total_dep_ch_diff, fill = idaci_decile)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(
+    colors = brewer.pal(11, "RdYlBu"),
+    limits = c(0, 10),  # Ensure 0 maps to red and 10 maps to blue
+    breaks = 0:10,      # Optional: discrete legend ticks for each decile
+    name = "IDACI Decile"
+  ) +
+  facet_wrap(~ catchment, scales = "fixed") +
+  labs(
+    title = "Change in Households with Dependent Children by IDACI Decile - Current Catchments",
+    x = "IDACI Decile",
+    y = "Difference in Count Households with Dependent Children"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")  # Adjust the legend position
+```
