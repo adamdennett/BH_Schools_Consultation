@@ -50,6 +50,18 @@ con <- dbConnect(RPostgres::Postgres(),
 
 ```{r}
 bn_postcodes <- st_read(con, "bn_postcode_centroids")
+bn_oa <- ew_oa %>%
+  filter(grepl("Brighton and Hove", lsoa21nm))
+
+bh_hh_comp <- read_csv("data/bh_hh_comp.csv")
+bh_hh_oa_map <- left_join(bh_hh_comp, bn_oa, by = join_by(oa21 == oa21cd))
+bh_hh_oa_map <- left_join(bn_oa, bh_hh_comp, by = join_by(oa21cd == oa21))
+
+optionZ <- st_read("data/optionZ_Mar25.geojson")
+option0 <- st_read("data/current_catchments_fix.geojson")
+
+bn_all_deprivation <- read_csv("data/bn_all_deprivation.csv") %>% 
+  clean_names()
 
 pcds_p003 <- read_csv("data/pcds_p003.csv") %>% clean_names()
 pcd_hh_count <- read_csv("data/pcd_p002.csv") %>% clean_names()
@@ -68,28 +80,72 @@ bn_postcodes_pop1 <- bn_postcodes_pop %>%
   mutate(pcd_oa_hh_prop = count / sum(count)) %>%
   ungroup()
 
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>% 
+  merge(bh_hh_comp, by.x = "oa21", by.y = "oa21")
+
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
+  mutate(pcd_dep_ch_hh_count = pcd_oa_hh_prop * all_dependent_ch_hh) 
+
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
+  mutate(pcd_dep_ch_hh_count_round = round(pcd_oa_hh_prop * all_dependent_ch_hh)) 
+
+bn_postcodes_pop1 <- merge(
+  bn_postcodes_pop1, 
+  bn_all_deprivation, 
+  by.x = "pcds", 
+  by.y = "postcode")
+
+
 ew_oa <- st_read(con, "oa_2021_ew_bfc_v8") %>% 
   st_set_crs(27700)
 # Filter the data frame
-bn_oa <- ew_oa %>%
-  filter(grepl("Brighton and Hove", lsoa21nm))
-
-bh_hh_comp <- read_csv("data/bh_hh_comp.csv")
-bh_hh_oa_map <- left_join(bh_hh_comp, bn_oa, by = join_by(oa21 == oa21cd))
-bh_hh_oa_map <- left_join(bn_oa, bh_hh_comp, by = join_by(oa21cd == oa21))
 
 
+
+
+#write_csv(bh_pcd_hh_count, "bn_pcd_hh_count.csv")
 
 ```
 
 ```{r}
 tmap_mode("view")
-tmap_options(check.and.fix = T)
+tmap_options(check_and_fix = T)
 
-tm_shape(bn_oa) + 
-  tm_polygons() +
-tm_shape(bn_postcodes_pop) +
-  tm_dots()
+selection <- bn_postcodes_pop1 %>%
+  select(c("pcds", "pcd_dep_ch_hh_count_round", "total_hh", "idaci_decile")) %>%
+  rename(
+    Postcode = pcds,
+    `Households with Dependent Children` = pcd_dep_ch_hh_count_round,
+    `Total Households` = total_hh,
+    `IDACI Decile` = idaci_decile
+  )
+
+# Filter the data
+filtered_data <- bn_postcodes_pop1 %>%
+  filter(pcd_dep_ch_hh_count_round > 5)
+
+# Adjust the data to emphasize small values
+tm_shape(optionZ) +
+  tm_polygons(alpha = 0,
+              border.col = "red") +
+tm_shape(option0) +
+  tm_polygons(alpha = 0) +
+tm_shape(selection) +
+  tm_dots(
+    size = "Households with Dependent Children",
+    alpha = 0.5,
+    fill = "IDACI Decile",
+    col = "IDACI Decile",
+    col.alpha = 0.2,
+    lwd = 0,
+    palette = "brewer.rd_yl_bu"
+  ) +
+  tm_layout(
+    frame = FALSE,
+    legend.outside = TRUE
+  )
+
+
 ```
 
 ```{r}
@@ -98,14 +154,12 @@ tmap_mode("view")
 tmap_options(check.and.fix = T)
 
 tm_shape(bh_hh_oa_map) + 
-  tm_polygons(col = "prop_hh_dependent_ch", border.alpha = 0) 
+  tm_polygons(col = "all_dependent_ch_hh", alpha=0.5,  border.alpha = 0) 
 
 ```
 
 ```{r}
 
-bn_postcodes_pop1 <- bn_postcodes_pop1 %>% 
-  merge(bh_hh_comp, by.x = "oa21", by.y = "oa21")
 
 # Create a new data frame with multiplied values
 bn_postcodes_pop2 <- bn_postcodes_pop1 %>%

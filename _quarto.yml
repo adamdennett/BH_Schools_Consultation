@@ -8,7 +8,7 @@ project:
     - about.qmd
     - catchment_map.qmd
     - travel_maps.qmd
-    - factsheet_roadmap.qmd
+    - postcode_school_pop.qmd
 
 website:
   title: "Brighton and Hove Secondary Schools Consultation Evidence"
