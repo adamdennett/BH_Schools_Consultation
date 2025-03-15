@@ -769,7 +769,7 @@
     "href": "catchment_map.html#both-overlaid",
     "title": "Detailed, Zoomable Consultation Catchment Maps",
     "section": "Both overlaid",
-    "text": "Both overlaid\n\n\nCode\ntm_shape(optionZ) +\n  tm_polygons(border.col = \"red\", alpha = 0) +\ntm_shape(current) +\n  tm_polygons(border.col = \"black\", alpha = 0)\n\n\n\n\n\n── tmap v3 code detected ───────────────────────────────────────────────────────\n\n\n[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.\n[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.",
+    "text": "Both overlaid\n\n\nCode\nlibrary(tmap)\n\ntmap_mode(\"view\")  # Ensure you're in plotting mode\n\n\nℹ tmap mode set to \"view\".\n\n\nCode\ntm_shape(optionZ) +\n  tm_polygons(border.col = \"red\", border.alpha = 0.5, border.lwd = 2, alpha = 0) +\ntm_shape(current) +\n  tm_polygons(border.col = \"black\", border.alpha = 0.5, border.lwd = 2, alpha = 0) +\ntm_shape(bh_sec_sch) +\n  tm_dots(\n    col = \"black\",\n    border.lwd = 0,\n    labels = \"establishment_name\"\n  )\n\n\n\n── tmap v3 code detected ───────────────────────────────────────────────────────\n[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.[v3-&gt;v4] `tm_polygons()`: use `col_alpha` instead of `border.alpha`.[tm_polygons()] Argument `border.lwd` unknown.[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.[v3-&gt;v4] `tm_polygons()`: use `col_alpha` instead of `border.alpha`.[tm_polygons()] Argument `border.lwd` unknown.",
     "crumbs": [
       "Maps",
       "Detailed, Zoomable Consultation Catchment Maps"

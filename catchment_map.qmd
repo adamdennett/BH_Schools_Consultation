@@ -12,8 +12,8 @@ library(tmap)
 library(here)
 library(janitor)
 
-optionZ <- st_read(here("data","optionZ.geojson"))
-current <- st_read(here("data","current_catchments.geojson"))
+optionZ <- st_read("data/optionZ_Mar25.geojson")
+current <- st_read("data/current_catchments_fix.geojson")
 
 brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
   clean_names() %>% 
@@ -51,14 +51,29 @@ tm_shape(bh_sec_sch) +
 ```{r echo=F, message=F, warning=FALSE}
 
 tm_shape(optionZ) +
-  tm_polygons(border.col = "red", alpha = 0)
+  tm_polygons(border.col = "red", alpha = 0) +
+tm_shape(bh_sec_sch) +
+  tm_dots(col = "black", 
+          border.lwd = 0,
+          labels = "establishment_name") 
 ```
 
 ## Both overlaid
 
 ```{r}
+library(tmap)
+
+tmap_mode("view")  # Ensure you're in plotting mode
+
 tm_shape(optionZ) +
-  tm_polygons(border.col = "red", alpha = 0) +
+  tm_polygons(border.col = "red", border.alpha = 0.5, border.lwd = 2, alpha = 0) +
 tm_shape(current) +
-  tm_polygons(border.col = "black", alpha = 0)
+  tm_polygons(border.col = "black", border.alpha = 0.5, border.lwd = 2, alpha = 0) +
+tm_shape(bh_sec_sch) +
+  tm_dots(
+    col = "black",
+    border.lwd = 0,
+    labels = "establishment_name"
+  )
+
 ```
