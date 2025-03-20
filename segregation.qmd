@@ -266,6 +266,10 @@ calculate_gorard_segregation <- function(df) {
   return(gorard_segregation)
 }
 
+#england_school_2022_23_not_special$dis <- calculate_index_of_dissimilarity(england_school_2022_23_not_special)
+
+#england_school_2022_23_not_special$gor <- calculate_gorard_segregation(england_school_2022_23_not_special)
+
 # Apply the functions to each LEA and create a new dataframe with the results
 results_df <- england_school_2022_23_not_special %>%
   group_by(LEA) %>%
