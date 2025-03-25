@@ -65,8 +65,7 @@ con <- dbConnect(RPostgres::Postgres(),
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE}
-bn_postcodes <- st_read(con, "bn_postcode_centroids")
-
+bn_postcodes <- st_read(con, "bn_postcode_centroids") 
 
 ew_oa <- st_read(con, "oa_2021_ew_bfc_v8") %>% 
   st_set_crs(27700)
@@ -84,6 +83,9 @@ option0 <- st_read("data/current_catchments_fix.geojson")
 bn_all_deprivation <- read_csv("data/bn_all_deprivation.csv") %>% 
   clean_names()
 
+bn_dep_ch_ethnicity_hrp <- read_csv("data/bh_dep_ch_ethnicity_hrp.csv") %>% 
+  clean_names()
+
 pcds_p003 <- read_csv("data/pcds_p003.csv") %>% clean_names()
 pcd_hh_count <- read_csv("data/pcd_p002.csv") %>% clean_names()
 pcd_person_count <- read_csv("data/pcd_p001.csv") %>% clean_names()
@@ -91,18 +93,41 @@ pcd_person_count <- read_csv("data/pcd_p001.csv") %>% clean_names()
 bh_pcd_hh_count <- pcd_hh_count %>% 
   filter(grepl("^BN", postcode))
 
+bh_pcd_person_count <- pcd_person_count %>% 
+  filter(grepl("^BN", postcode))
+
+# Summing count for each unique postcode
+bh_agg_pcd_person_count <- bh_pcd_person_count %>%
+  group_by(postcode) %>%
+  summarise(total_count = sum(count, na.rm = TRUE))
+
+
 bn_postcodes_pop <- bn_postcodes %>%
-  select(c("pcd", "pcd2", "pcds", "oa21", "lsoa21", "oseast1m", "osnrth1m", "geometry")) %>%
-  merge(bh_pcd_hh_count, by.x = "pcds", by.y = "postcode")
+  dplyr::select(c("pcd", "pcd2", "pcds", "oa21", "lsoa21", "msoa21", "oseast1m", "osnrth1m", "geometry")) %>%
+  merge(bh_pcd_hh_count, by.x = "pcds", by.y = "postcode") %>% 
+  merge(bh_agg_pcd_person_count, by.x = "pcds", by.y = "postcode")
+
+bn_postcodes_pop <- bn_postcodes_pop %>%
+  rename(
+    household_count = count,
+    person_count = total_count
+  )
+
 
 # Calculate the proportion of households in each postcode
 bn_postcodes_pop1 <- bn_postcodes_pop %>%
   group_by(oa21) %>%
-  mutate(pcd_oa_hh_prop = count / sum(count)) %>%
+  mutate(pcd_oa_hh_prop = household_count / sum(household_count)) %>%
+  mutate(pcd_oa_pers_prop = person_count / sum(person_count)) %>%
   ungroup()
 
+#merge households with dependent children
 bn_postcodes_pop1 <- bn_postcodes_pop1 %>% 
   merge(bh_hh_comp, by.x = "oa21", by.y = "oa21")
+
+#merge dependent children by ethnicity
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>% 
+  merge(bn_dep_ch_ethnicity_hrp, by.x = "oa21", by.y = "oa21")
 
 bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
   mutate(pcd_dep_ch_hh_count = pcd_oa_hh_prop * all_dependent_ch_hh) 
@@ -110,11 +135,53 @@ bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
 bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
   mutate(pcd_dep_ch_hh_count_round = round(pcd_oa_hh_prop * all_dependent_ch_hh)) 
 
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
+  mutate(pcd_dep_ch_0_18_total_count = round(pcd_oa_pers_prop * total_dep_ch_0_18)) %>% 
+  mutate(pcd_dep_ch_0_18_white_count = round(pcd_oa_pers_prop * white_dep_ch_0_18)) %>% 
+  mutate(pcd_dep_ch_0_18_non_white_count = round(pcd_oa_pers_prop * non_white_dep_ch_0_18)) 
+
 bn_postcodes_pop1 <- merge(
   bn_postcodes_pop1, 
   bn_all_deprivation, 
   by.x = "pcds", 
   by.y = "postcode")
+
+library(sf)
+library(dplyr)
+
+# Ensure the CRS (Coordinate Reference System) is the same for spatial operations
+bn_postcodes_pop1 <- st_transform(bn_postcodes_pop1, st_crs(option0))
+option0 <- st_transform(option0, st_crs(bn_postcodes_pop1))
+optionZ <- st_transform(optionZ, st_crs(bn_postcodes_pop1))
+
+# Add catchment_2024 based on intersections with option0
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
+  mutate(catchment_2024 = sapply(
+    st_intersects(geometry, option0),
+    function(idx) {
+      if (length(idx) > 0) {
+        option0$catchment[idx]  # Extract the "catchment" value from the intersecting polygon
+      } else {
+        NA  # No intersection, assign NA
+      }
+    }
+  ))
+
+# Add catchment_2026 based on intersections with optionZ
+bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
+  mutate(catchment_2026 = sapply(
+    st_intersects(geometry, optionZ),
+    function(idx) {
+      if (length(idx) > 0) {
+        optionZ$catchment[idx]  # Extract the "catchment" value from the intersecting polygon
+      } else {
+        NA  # No intersection, assign NA
+      }
+    }
+  ))
+
+# Check the structure of the updated dataframe
+str(bn_postcodes_pop1)
 
 write_csv(bn_postcodes_pop1, "bn_postcodes_pop1.csv")
 
@@ -125,10 +192,11 @@ tmap_mode("view")
 tmap_options(check_and_fix = T)
 
 selection <- bn_postcodes_pop1 %>%
-  select(c("pcds", "pcd_dep_ch_hh_count_round", "total_hh", "idaci_decile")) %>%
+  dplyr::select(c("pcds", "pcd_dep_ch_hh_count_round", "pcd_dep_ch_0_18_non_white_count","total_hh", "idaci_decile")) %>%
   rename(
     Postcode = pcds,
     `Households with Dependent Children` = pcd_dep_ch_hh_count_round,
+    `Total non-white children 0-18` = pcd_dep_ch_0_18_non_white_count,
     `Total Households` = total_hh,
     `IDACI Decile` = idaci_decile
   )
@@ -213,6 +281,9 @@ leaflet() %>%
 
 
 ```
+
+
+
 
 ```{r}
 library(sf)          # For spatial data manipulation
@@ -718,3 +789,66 @@ ggplot(comparison_data, aes(x = factor(idaci_decile), y = diff, fill = idaci_dec
 
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+library(leaflet)
+
+optionZ <- st_transform(optionZ, 4326)
+option0 <- st_transform(option0, 4326)
+selection <- st_transform(selection, 4326)
+bn_postcodes_pop1 <- st_transform(bn_postcodes_pop1, 4326)
+
+
+# Create color palette
+color_palette <- colorNumeric(
+  palette = "Blues",
+  domain = selection$`Total non-white children 0-18`
+)
+
+
+color_palette(runif(10, 60, 100))
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  
+  # Add the `optionZ` polygon layer with a red border
+  addPolygons(
+    data = optionZ,
+    color = "red",
+    opacity = 0.5,
+    fillOpacity = 0
+  ) %>%
+  
+  # Add the `option0` polygon layer
+  addPolygons(
+    data = option0,
+    color = NULL,
+    opacity = 0.5,
+    fillOpacity = 0
+  ) %>%
+  
+  # Add the `selection` point layer with color mapping for `Total non-white children 0-18`
+  addCircleMarkers(
+    data = selection,
+    radius = ~`Total non-white children 0-18` / 2.5, # Scale radius
+    fillColor = ~color_palette(`Total non-white children 0-18`), # Apply color
+    fillOpacity = 0.5,
+    stroke = FALSE,
+    label = ~paste(
+      Postcode,
+      "Total non-white children 0-18:", `Total non-white children 0-18`,
+      "Total Households:", `Total Households`,
+      "IDACI Decile:", `IDACI Decile`
+    )
+  ) %>%
+  
+  # Add a legend for the `Total non-white children 0-18` column
+  addLegend(
+    pal = color_palette,
+    values = selection$`Total non-white children 0-18`,
+    title = "Total non-white children 0-18",
+    opacity = 1,
+    position = "bottomright"
+  )
+
+
+```
