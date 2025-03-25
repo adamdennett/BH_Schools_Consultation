@@ -183,7 +183,7 @@ bn_postcodes_pop1 <- bn_postcodes_pop1 %>%
 # Check the structure of the updated dataframe
 str(bn_postcodes_pop1)
 
-write_csv(bn_postcodes_pop1, "bn_postcodes_pop1.csv")
+write_csv(bn_postcodes_pop1, "data/bn_postcodes_pop1.csv")
 
 ```
 
