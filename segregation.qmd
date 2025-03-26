@@ -77,6 +77,59 @@ brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmm
 btn_urn_list <- brighton_sec_schools %>% 
   select(urn) 
 
+london_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(gor_name == "London") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700)
+
+library(tmap)
+qtm(london_sec_schools)
+
+library(raster)
+library(terra)
+library(spatstat)
+coordinates <- as.matrix(st_coordinates(london_sec_schools))
+raster_points <- rasterize(coordinates, raster_grid, field = NULL, background = 0)
+density_raster <- focal(raster_points, w = 15, fun = mean, na.rm = TRUE)
+density_df <- as.data.frame(density_raster, xy = TRUE)
+
+library(ggplot2)
+ggplot() +
+  geom_raster(data = density_df, aes(x = x, y = y, fill = focal_mean)) +
+  geom_point(data = london_sec_schools, aes(x = st_coordinates(london_sec_schools)[,1], 
+                                            y = st_coordinates(london_sec_schools)[,2]),
+             color = "red", size = 1) +
+  scale_fill_viridis_c(option = "D", na.value = "transparent") +
+  coord_equal() +
+  labs(title = "Kernel Density of Secondary Schools in London",
+       x = "Easting", y = "Northing", fill = "Density") +
+  theme_minimal()
+
+
+# Load packages
+library(spatstat)
+library(sf)
+library(raster)
+
+# Assume you have point data in a data frame called 'points'
+# with columns 'x' and 'y'
+
+# Convert to a ppp object
+point_pattern <- as.ppp(raster_points, check = FALSE)
+
+# Estimate kernel density
+intensity_raster <- density(point_pattern, sigma = 50) # Adjust sigma as needed
+
+# Create a raster
+intensity_raster <- raster(intensity_raster)
+
+# Plot the raster
+plot(intensity_raster)
+
+
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
