@@ -736,7 +736,7 @@ leaflet() %>%
                    radius = 1, 
                    opacity = 0.3, 
                    fillOpacity = 0.3,
-                   popup = ~paste0("ID: ", id, "<br>Closest School: ", second_closest_travel, "(Travel Time)")) %>%
+                   popup = ~paste0("ID: ", id, "<br>Closest School: ", first_closest_travel, "(Travel Time)")) %>%
   addCircleMarkers(data = bh_sec_sch, 
                    ~long, ~lat, 
                    color = "black", 
@@ -797,11 +797,11 @@ leaflet() %>%
               fillOpacity = 0) %>% 
   addCircleMarkers(data = bn_pcds_sch_travel, 
                    bn_pcds_sch_travel$long, bn_pcds_sch_travel$lat, 
-                   color = ~pal_second_closest_travel(third_closest_travel), 
+                   color = ~pal_third_closest_travel(third_closest_travel), 
                    radius = 1, 
                    opacity = 0.3, 
                    fillOpacity = 0.3,
-                   popup = ~paste0("ID: ", id, "<br>Third closest School: ", second_closest_travel, "(Travel Time)")) %>%
+                   popup = ~paste0("ID: ", id, "<br>Third closest School: ", third_closest_travel, "(Travel Time)")) %>%
   addCircleMarkers(data = bh_sec_sch, 
                    bh_sec_sch$long, bh_sec_sch$lat, 
                    color = "black", 
