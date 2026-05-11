@@ -10,3 +10,5 @@ BrightonLSOASchoolChildren.geojson
 *.zip
 gganim/
 api_key.R
+# Claude Code worktrees (never track these)
+.claude/
