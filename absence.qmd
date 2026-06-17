@@ -66,9 +66,9 @@ library(ggrepel)
 
 -   Serious questions need to be asked about why Councillors from wards in the city which given the current school catchments, will be home to the majority of persistent absentees, are not aware of the #1 issue driving educational disadvantage in their wards, but are happy to support plans which will make the educational outcomes in their areas even worse. These wards in particular are:
 
-    -   Colden and Stanmer
+    -   Coldean and Stanmer
 
-    -   Moulscoombe and Bevendean
+    -   Moulsecoomb and Bevendean
 
     -   Woodingdean
 
