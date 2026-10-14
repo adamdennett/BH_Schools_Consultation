@@ -297,7 +297,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -338,7 +338,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -379,7 +379,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -420,7 +420,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -461,7 +461,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -502,7 +502,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -543,7 +543,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -584,7 +584,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -625,7 +625,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -666,7 +666,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
          lat = st_coordinates(geometry)[, 2])
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%  # Plain basemap
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -790,7 +790,7 @@ pal_first_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$
 pal_first_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$first_closest_travel)
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -823,7 +823,7 @@ leaflet() %>%
 pal_second_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$second_closest_travel)
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 
@@ -855,7 +855,7 @@ leaflet() %>%
 pal_third_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$third_closest_travel)
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%
   addPolygons(data = optionZ, 
               color = "grey", 
               fillOpacity = 0) %>% 

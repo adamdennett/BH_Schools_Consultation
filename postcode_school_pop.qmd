@@ -304,7 +304,7 @@ bn_postcodes_pop1 <- st_transform(bn_postcodes_pop1, 4326)
 
 leaflet() %>%
   # Add a less intrusive basemap
-  addProviderTiles(providers$CartoDB.Positron) %>% # Light, minimalistic basemap
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% # Light, minimalistic basemap
   # Add the `optionZ` polygon layer with a red border
   addPolygons(
     data = optionZ,
@@ -873,7 +873,7 @@ color_palette <- colorNumeric(
 color_palette(runif(10, 60, 100))
 
 leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%
   
   # Add the `optionZ` polygon layer with a red border
   addPolygons(

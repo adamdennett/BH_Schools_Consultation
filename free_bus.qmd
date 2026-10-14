@@ -206,7 +206,7 @@ longhill_bus_cost <- subset_cost %>% filter(destination_id == 114581)
 longhill_bus_free <- subset_free %>% filter(destination_id == 114581)
 
 map <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = longhill_bus_free, 
                color = "#9e0142", 
                weight = 2, 
@@ -242,7 +242,7 @@ baca_bus_cost <- subset_cost %>% filter(destination_id == 136164)
 baca_bus_free <- subset_free %>% filter(destination_id == 136164)
 
 map <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = baca_bus_free, 
                color = "#9e0142",  
                weight = 2, 
@@ -280,7 +280,7 @@ varndean_bus_cost <- subset_cost %>% filter(destination_id == 114579)
 varndean_bus_free <- subset_free %>% filter(destination_id == 114579)
 
 map <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = varndean_bus_free, 
                color = "#9e0142",   
                weight = 2, 

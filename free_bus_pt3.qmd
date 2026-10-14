@@ -141,7 +141,7 @@ blatchington_bus_cost <- subset_cost %>% filter(destination_id == 114606)
 blatchington_bus_free <- subset_free %>% filter(destination_id == 114606)
 
 map_blatchington <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = blatchington_bus_free, 
                color = "#9e0142", 
                weight = 2, 
@@ -175,7 +175,7 @@ hovepark_bus_cost <- subset_cost %>% filter(destination_id == 114607)
 hovepark_bus_free <- subset_free %>% filter(destination_id == 114607)
 
 map_hovepark <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = hovepark_bus_free, 
                color = "#9e0142", 
                weight = 2, 
@@ -209,7 +209,7 @@ kings_bus_cost <- subset_cost %>% filter(destination_id == 139409)
 kings_bus_free <- subset_free %>% filter(destination_id == 139409)
 
 map_kings <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = kings_bus_free, 
                color = "#9e0142", 
                weight = 2, 
@@ -243,7 +243,7 @@ paca_bus_cost <- subset_cost %>% filter(destination_id == 137063)
 paca_bus_free <- subset_free %>% filter(destination_id == 137063)
 
 map_paca <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = paca_bus_free, 
                color = "#9e0142", 
                weight = 2, 

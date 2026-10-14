@@ -141,7 +141,7 @@ stringer_bus_cost <- subset_cost %>% filter(destination_id == 114580)
 stringer_bus_free <- subset_free %>% filter(destination_id == 114580)
 
 map_stringer <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = stringer_bus_free, 
                color = "#9e0142",
                weight = 2, 
@@ -176,7 +176,7 @@ patcham_bus_cost <- subset_cost %>% filter(destination_id == 114608)
 patcham_bus_free <- subset_free %>% filter(destination_id == 114608)
 
 map_patcham <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = patcham_bus_free, 
                color = "#9e0142", 
                weight = 2, 
@@ -210,7 +210,7 @@ newman_bus_cost <- subset_cost %>% filter(destination_id == 114611)
 newman_bus_free <- subset_free %>% filter(destination_id == 114611)
 
 map_newman <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>% 
   addPolylines(data = newman_bus_free, 
                color = "#9e0142", 
                weight = 2, 

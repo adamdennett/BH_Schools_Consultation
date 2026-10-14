@@ -156,7 +156,7 @@ server <- function(input, output, session) {
     )
     
     leaflet(data) %>%
-      addProviderTiles(providers$CartoDB.Positron) %>%
+      addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(maxNativeZoom = 16, maxZoom = 20)) %>%
       addPolylines(
         data = st_as_sf(data, wkt = "geom"),
         color = ~pal(total_cost)
