@@ -880,7 +880,7 @@ leaflet() %>%
 
 ```
 
-```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
+```{r read-school-distances, warning=FALSE, message=FALSE, echo=FALSE}
 # Read the GeoPackage
 BN_pcds_to_school_dist <- st_read("data/BN_pcds_to_school_dist.gpkg") %>%   st_transform(4326)
 
