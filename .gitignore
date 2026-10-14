@@ -12,3 +12,9 @@ gganim/
 api_key.R
 # Claude Code worktrees (never track these)
 .claude/
+
+**/*.quarto_ipynb
+
+# Machine-local R environment
+.Rprofile
+rjavaenv/
